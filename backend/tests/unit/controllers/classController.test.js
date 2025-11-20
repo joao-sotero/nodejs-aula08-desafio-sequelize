@@ -1,5 +1,35 @@
 import { jest } from '@jest/globals';
-import {
+
+const Class = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findByPk: jest.fn()
+};
+
+const Student = {
+  findAll: jest.fn()
+};
+
+const Subject = {
+  findAll: jest.fn()
+};
+
+const Grade = {
+  findAll: jest.fn()
+};
+
+await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+  __esModule: true,
+  default: {
+    Class,
+    Student,
+    Subject,
+    Grade
+  }
+}));
+
+const classController = await import('../../../src/controllers/classController.js');
+const {
   create,
   getAll,
   getById,
@@ -7,12 +37,7 @@ import {
   remove,
   addSubjects,
   removeSubjects
-} from '../../../src/controllers/classController.js';
-import models from '../../../src/models/index.js';
-
-jest.mock('../../../src/models/index.js');
-
-const { Class, Student, Subject, Grade } = models;
+} = classController;
 
 describe('classController', () => {
   let req;

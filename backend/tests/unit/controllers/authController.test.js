@@ -1,14 +1,39 @@
 import { jest } from '@jest/globals';
-import { register, login } from '../../../src/controllers/authController.js';
-import models from '../../../src/models/index.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 
-jest.mock('../../../src/models/index.js');
-jest.mock('bcrypt');
-jest.mock('jsonwebtoken');
+const scopedUser = {
+  findOne: jest.fn()
+};
 
-const { User, Student } = models;
+const User = {
+  findOne: jest.fn(),
+  create: jest.fn(),
+  scope: jest.fn(() => scopedUser)
+};
+
+const Student = {
+  findByPk: jest.fn()
+};
+
+const signMock = jest.fn();
+
+await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+  __esModule: true,
+  default: {
+    User,
+    Student
+  }
+}));
+
+await jest.unstable_mockModule('jsonwebtoken', () => ({
+  __esModule: true,
+  default: {
+    sign: signMock
+  }
+}));
+
+const authController = await import('../../../src/controllers/authController.js');
+const { register, login } = authController;
+const jwt = (await import('jsonwebtoken')).default;
 
 describe('authController', () => {
   let req, res, next;
@@ -31,6 +56,7 @@ describe('authController', () => {
   describe('register', () => {
     it('deve registrar um usuário admin com sucesso', async () => {
       req.body = {
+        nome: 'Admin User',
         email: 'admin@test.com',
         password: 'senha123',
         role: 'admin'
@@ -38,63 +64,74 @@ describe('authController', () => {
 
       const mockUser = {
         id: 1,
+        nome: 'Admin User',
         email: 'admin@test.com',
         role: 'admin',
-        studentId: null
+        studentId: null,
+        createdAt: new Date().toISOString()
       };
 
       User.findOne.mockResolvedValue(null);
-      bcrypt.hash.mockResolvedValue('hashedPassword');
       User.create.mockResolvedValue(mockUser);
 
       await register(req, res, next);
 
-      expect(User.create).toHaveBeenCalledWith({
+      expect(User.create).toHaveBeenCalledWith(expect.objectContaining({
+        nome: 'Admin User',
         email: 'admin@test.com',
-        password: 'hashedPassword',
-        role: 'admin',
-        studentId: null
-      });
+        password: 'senha123',
+        role: 'admin'
+      }));
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Usuário criado com sucesso',
         user: expect.objectContaining({
+          id: mockUser.id,
+          nome: 'Admin User',
           email: 'admin@test.com',
-          role: 'admin'
+          role: 'admin',
+          studentId: null
         })
       });
     });
 
     it('deve registrar um usuário student vinculado a um aluno', async () => {
       req.body = {
+        nome: 'João Souza',
         email: 'student@test.com',
         password: 'senha123',
         role: 'student',
         studentId: 10
       };
-
-      const mockStudent = { id: 10, nome: 'João Silva' };
       const mockUser = {
         id: 2,
         email: 'student@test.com',
         role: 'student',
         studentId: 10,
-        student: mockStudent
+        nome: 'João Souza',
+        createdAt: new Date().toISOString()
       };
 
       User.findOne.mockResolvedValue(null);
-      Student.findByPk.mockResolvedValue(mockStudent);
-      bcrypt.hash.mockResolvedValue('hashedPassword');
       User.create.mockResolvedValue(mockUser);
 
       await register(req, res, next);
 
-      expect(Student.findByPk).toHaveBeenCalledWith(10);
       expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Usuário criado com sucesso',
+        user: expect.objectContaining({
+          id: mockUser.id,
+          nome: 'João Souza',
+          studentId: 10,
+          role: 'student'
+        })
+      });
     });
 
     it('deve retornar erro 400 quando email já existe', async () => {
       req.body = {
+        nome: 'Admin',
         email: 'admin@test.com',
         password: 'senha123'
       };
@@ -119,26 +156,25 @@ describe('authController', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Email e senha são obrigatórios'
+        error: 'Todos os campos são obrigatórios (nome, email, password)'
       });
     });
 
-    it('deve retornar erro 404 quando studentId não existe', async () => {
+    it('deve retornar erro 400 quando studentId não é informado para role student', async () => {
       req.body = {
+        nome: 'Aluno',
         email: 'student@test.com',
         password: 'senha123',
-        role: 'student',
-        studentId: 999
+        role: 'student'
       };
 
       User.findOne.mockResolvedValue(null);
-      Student.findByPk.mockResolvedValue(null);
 
       await register(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Aluno não encontrado'
+        error: 'studentId é obrigatório para usuários do tipo student'
       });
     });
   });
@@ -152,19 +188,19 @@ describe('authController', () => {
 
       const mockUser = {
         id: 1,
+        nome: 'Admin User',
         email: 'admin@test.com',
-        password: 'hashedPassword',
         role: 'admin',
-        studentId: null
+        studentId: null,
+        validatePassword: jest.fn().mockResolvedValue(true)
       };
 
-      User.findOne.mockResolvedValue(mockUser);
-      bcrypt.compare.mockResolvedValue(true);
-      jwt.sign.mockReturnValue('mocked-jwt-token');
+      scopedUser.findOne.mockResolvedValue(mockUser);
+      signMock.mockReturnValue('mocked-jwt-token');
 
       await login(req, res, next);
 
-      expect(bcrypt.compare).toHaveBeenCalledWith('senha123', 'hashedPassword');
+      expect(mockUser.validatePassword).toHaveBeenCalledWith('senha123');
       expect(jwt.sign).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 1,
@@ -174,14 +210,15 @@ describe('authController', () => {
         expect.any(String),
         expect.any(Object)
       );
-      expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Login realizado com sucesso',
         token: 'mocked-jwt-token',
-        user: expect.objectContaining({
+        user: {
+          id: 1,
+          nome: 'Admin User',
           email: 'admin@test.com',
-          role: 'admin'
-        })
+          role: 'admin',
+          studentId: null
+        }
       });
     });
 
@@ -191,7 +228,7 @@ describe('authController', () => {
         password: 'senha123'
       };
 
-      User.findOne.mockResolvedValue(null);
+      scopedUser.findOne.mockResolvedValue(null);
 
       await login(req, res, next);
 
@@ -210,12 +247,12 @@ describe('authController', () => {
       const mockUser = {
         id: 1,
         email: 'admin@test.com',
-        password: 'hashedPassword',
-        role: 'admin'
+        role: 'admin',
+        studentId: null,
+        validatePassword: jest.fn().mockResolvedValue(false)
       };
 
-      User.findOne.mockResolvedValue(mockUser);
-      bcrypt.compare.mockResolvedValue(false);
+      scopedUser.findOne.mockResolvedValue(mockUser);
 
       await login(req, res, next);
 

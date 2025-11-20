@@ -1,10 +1,24 @@
 import { jest } from '@jest/globals';
-import { generateBoletim } from '../../../src/services/boletimService.js';
-import models from '../../../src/models/index.js';
 
-jest.mock('../../../src/models/index.js');
+const Student = {
+  findByPk: jest.fn()
+};
 
-const { Student } = models;
+const Class = {};
+const Grade = {};
+const Subject = {};
+
+await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+  __esModule: true,
+  default: {
+    Student,
+    Class,
+    Grade,
+    Subject
+  }
+}));
+
+const { generateBoletim } = await import('../../../src/services/boletimService.js');
 
 describe('boletimService', () => {
   afterEach(() => {

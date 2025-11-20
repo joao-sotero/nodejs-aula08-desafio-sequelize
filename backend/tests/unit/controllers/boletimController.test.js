@@ -1,8 +1,14 @@
 import { jest } from '@jest/globals';
-import { getMyBoletim, getBoletim } from '../../../src/controllers/boletimController.js';
-import { generateBoletim } from '../../../src/services/boletimService.js';
 
-jest.mock('../../../src/services/boletimService.js');
+const generateBoletim = jest.fn();
+
+await jest.unstable_mockModule('../../../src/services/boletimService.js', () => ({
+  __esModule: true,
+  generateBoletim,
+  default: { generateBoletim }
+}));
+
+const { getMyBoletim, getBoletim } = await import('../../../src/controllers/boletimController.js');
 
 describe('boletimController', () => {
   let req, res, next;
@@ -88,8 +94,8 @@ describe('boletimController', () => {
       });
     });
   });
+
   describe('getBoletim', () => {
-  describe('getBoletimByStudentId', () => {
     it('deve retornar boletim de um aluno específico com sucesso', async () => {
       req.params.studentId = '10';
 

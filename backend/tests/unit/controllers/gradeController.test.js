@@ -1,10 +1,36 @@
 import { jest } from '@jest/globals';
-import { create, getAll, getById, update, remove } from '../../../src/controllers/gradeController.js';
-import models from '../../../src/models/index.js';
 
-jest.mock('../../../src/models/index.js');
+const Grade = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findByPk: jest.fn(),
+  findOne: jest.fn()
+};
 
-const { Grade, Student, Subject, Class } = models;
+const Student = {
+  findByPk: jest.fn()
+};
+
+const Subject = {
+  findByPk: jest.fn()
+};
+
+const Class = {
+  findByPk: jest.fn()
+};
+
+await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+  __esModule: true,
+  default: {
+    Grade,
+    Student,
+    Subject,
+    Class
+  }
+}));
+
+const gradeController = await import('../../../src/controllers/gradeController.js');
+const { create, getAll, getById, update, remove } = gradeController;
 
 describe('gradeController', () => {
   let req, res, next;
@@ -69,10 +95,7 @@ describe('gradeController', () => {
       await create(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        message: 'Nota lançada com sucesso',
-        data: expect.any(Object)
-      }));
+      expect(res.json).toHaveBeenCalledWith(mockGrade);
     });
 
     it('deve retornar erro 400 quando campos obrigatórios estão faltando', async () => {
@@ -137,7 +160,10 @@ describe('gradeController', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        error: 'Esta disciplina não está vinculada à turma do aluno'
+        error: 'Esta disciplina não está vinculada à turma do aluno',
+        details: expect.objectContaining({
+          mensagem: 'Você precisa vincular esta disciplina à turma antes de lançar notas'
+        })
       }));
     });
 
@@ -173,7 +199,7 @@ describe('gradeController', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Já existe nota lançada para esta unidade'
+        error: 'Já existe nota cadastrada para este aluno nesta disciplina e unidade'
       });
     });
   });
@@ -268,6 +294,10 @@ describe('gradeController', () => {
       expect(mockGrade.prova).toBe(8);
       expect(mockGrade.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Nota atualizada com sucesso',
+        data: mockGrade
+      });
     });
 
     it('deve retornar erro 404 quando nota não existe', async () => {
@@ -304,7 +334,7 @@ describe('gradeController', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'teste e prova devem estar entre 0 e 10'
+        error: 'teste deve estar entre 0 e 10'
       });
     });
   });

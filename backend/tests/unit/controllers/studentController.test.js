@@ -1,10 +1,30 @@
 import { jest } from '@jest/globals';
-import { create, getAll, getById, update, remove } from '../../../src/controllers/studentController.js';
-import models from '../../../src/models/index.js';
 
-jest.mock('../../../src/models/index.js');
+const Student = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findByPk: jest.fn()
+};
 
-const { Student, Class } = models;
+const Class = {
+  findByPk: jest.fn()
+};
+
+const Grade = {};
+const Subject = {};
+
+await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+  __esModule: true,
+  default: {
+    Student,
+    Class,
+    Grade,
+    Subject
+  }
+}));
+
+const studentController = await import('../../../src/controllers/studentController.js');
+const { create, getAll, getById, update, remove } = studentController;
 
 describe('studentController', () => {
   let req, res, next;
@@ -60,7 +80,7 @@ describe('studentController', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Nome do aluno é obrigatório'
+        error: 'Nome e classId são obrigatórios'
       });
     });
 
@@ -170,6 +190,10 @@ describe('studentController', () => {
       expect(mockStudent.classId).toBe(2);
       expect(mockStudent.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Aluno atualizado com sucesso',
+        data: expect.any(Object)
+      });
     });
 
     it('deve retornar erro 404 quando aluno não existe', async () => {
@@ -257,7 +281,8 @@ describe('studentController', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Não é possível deletar aluno com notas cadastradas'
+        error: 'Não é possível deletar aluno com notas cadastradas',
+        details: 'O aluno possui 2 nota(s)'
       });
     });
   });

@@ -12,6 +12,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import Classes from "./pages/Classes";
 import Subjects from "./pages/Subjects";
 import Students from "./pages/Students";
+import Users from "./pages/Users";
 import Grades from "./pages/Grades";
 import ReportCards from "./pages/ReportCards";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
             <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
             <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute adminOnly><Users /></ProtectedRoute>} />
             <Route path="/grades" element={<ProtectedRoute><Grades /></ProtectedRoute>} />
             <Route path="/report-cards" element={<ProtectedRoute><ReportCards /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

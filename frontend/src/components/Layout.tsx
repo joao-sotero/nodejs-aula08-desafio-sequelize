@@ -10,6 +10,7 @@ import {
   ClipboardList,
   FileText,
   LogOut,
+  UserPlus,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -32,6 +33,7 @@ export function Layout({ children }: LayoutProps) {
     { path: '/subjects', icon: BookOpen, label: 'Disciplinas' },
     { path: '/students', icon: GraduationCap, label: 'Alunos' },
     { path: '/grades', icon: ClipboardList, label: 'Notas' },
+    { path: '/users', icon: UserPlus, label: 'Usuários' },
     { path: '/report-cards', icon: FileText, label: 'Boletins' },
   ];
 

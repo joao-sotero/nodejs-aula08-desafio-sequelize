@@ -60,7 +60,25 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Admin\",\n  \"email\": \"admin@escola.com\",\n  \"password\": \"senha123\"\n}"
+              "raw": "{\n  \"nome\": \"Admin\",\n  \"email\": \"admin@escola.com\",\n  \"password\": \"senha123\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "POST /auth/register (student)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Aluno Example\",\n  \"email\": \"aluno@escola.com\",\n  \"password\": \"senha123\",\n  \"role\": \"student\",\n  \"studentId\": {{studentId}}\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/register",
@@ -176,6 +194,25 @@
           "name": "POST /classes/:id/subjects",
           "request": {
             "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subjectIds\": [ {{subjectId}} ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/classes/{{classId}}/subjects",
+              "host": ["{{base_url}}"],
+              "path": ["classes", "{{classId}}", "subjects"]
+            }
+          }
+        },
+        {
+          "name": "DELETE /classes/:id/subjects",
+          "request": {
+            "method": "DELETE",
             "header": [
               {"key": "Authorization", "value": "Bearer {{token}}"},
               {"key": "Content-Type", "value": "application/json"}
@@ -376,7 +413,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": {{studentId}},\n  \"classSubjectId\": 1,\n  \"bimestre\": 1,\n  \"mediaUnidade\": 8.5\n}"
+              "raw": "{\n  \"studentId\": {{studentId}},\n  \"subjectId\": {{subjectId}},\n  \"unidade\": 1,\n  \"teste\": 8.0,\n  \"prova\": 9.0\n}"
             },
             "url": {
               "raw": "{{base_url}}/grades",
@@ -423,7 +460,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"mediaUnidade\": 9.0\n}"
+              "raw": "{\n  \"teste\": 9.5,\n  \"prova\": 8.5\n}"
             },
             "url": {
               "raw": "{{base_url}}/grades/{{gradeId}}",
@@ -462,6 +499,20 @@
               "raw": "{{base_url}}/boletim/{{studentId}}",
               "host": ["{{base_url}}"],
               "path": ["boletim", "{{studentId}}"]
+            }
+          }
+        },
+        {
+          "name": "GET /boletim/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/boletim/me",
+              "host": ["{{base_url}}"],
+              "path": ["boletim", "me"]
             }
           }
         }
