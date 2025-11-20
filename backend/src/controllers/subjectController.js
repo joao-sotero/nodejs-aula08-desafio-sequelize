@@ -20,6 +20,26 @@ export const create = async (req, res, next) => {
 
 export const getAll = async (req, res, next) => {
   try {
+    const { classId } = req.query;
+
+    if (classId) {
+      const classEntity = await models.Class.findByPk(classId, {
+        include: [{
+          model: Subject,
+          as: 'subjects',
+          through: { attributes: [] },
+          order: [['nome', 'ASC']]
+        }]
+      });
+
+      if (!classEntity) {
+        return res.status(404).json({ error: 'Turma não encontrada' });
+      }
+
+      return res.status(200).json(classEntity.subjects || []);
+    }
+
+    // Caso contrário, retorna todas as disciplinas
     const subjects = await Subject.findAll({
       order: [['nome', 'ASC']]
     });

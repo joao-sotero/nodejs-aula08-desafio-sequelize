@@ -59,12 +59,16 @@ export default function Grades() {
     },
   });
 
+  // Busca disciplinas filtradas pela turma do aluno selecionado
+  const selectedStudent = students?.find((s: any) => s.id === parseInt(studentId));
   const { data: subjects } = useQuery({
-    queryKey: ['subjects'],
+    queryKey: ['subjects', selectedStudent?.classId],
     queryFn: async () => {
-      const response = await api.get('/subjects');
+      const params = selectedStudent?.classId ? `?classId=${selectedStudent.classId}` : '';
+      const response = await api.get(`/subjects${params}`);
       return response.data;
     },
+    enabled: !editingGrade, // Só busca ao criar nova nota
   });
 
   const createMutation = useMutation({
@@ -190,7 +194,14 @@ export default function Grades() {
                   <>
                     <div className="space-y-2">
                       <Label htmlFor="studentId">Aluno</Label>
-                      <Select value={studentId} onValueChange={setStudentId} required>
+                      <Select 
+                        value={studentId} 
+                        onValueChange={(value) => {
+                          setStudentId(value);
+                          setSubjectId(''); // Limpa a disciplina ao trocar de aluno
+                        }} 
+                        required
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione um aluno" />
                         </SelectTrigger>
@@ -205,9 +216,20 @@ export default function Grades() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="subjectId">Disciplina</Label>
-                      <Select value={subjectId} onValueChange={setSubjectId} required>
+                      <Select 
+                        value={subjectId} 
+                        onValueChange={setSubjectId} 
+                        required
+                        disabled={!studentId}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma disciplina" />
+                          <SelectValue placeholder={
+                            !studentId 
+                              ? "Selecione um aluno primeiro" 
+                              : subjects?.length === 0
+                              ? "Nenhuma disciplina vinculada"
+                              : "Selecione uma disciplina"
+                          } />
                         </SelectTrigger>
                         <SelectContent>
                           {subjects?.map((subject: any) => (
@@ -217,6 +239,11 @@ export default function Grades() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {studentId && subjects?.length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          A turma deste aluno não possui disciplinas vinculadas
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="unidade">Unidade</Label>
