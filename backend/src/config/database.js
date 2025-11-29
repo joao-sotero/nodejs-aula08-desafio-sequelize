@@ -1,3 +1,3 @@
-import config from './database.cjs';
+import { config } from './database.cjs';
 
 export default config;

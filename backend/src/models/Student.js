@@ -5,7 +5,7 @@ export default (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    nome: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {

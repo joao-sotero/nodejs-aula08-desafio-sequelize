@@ -20,21 +20,17 @@ export default (sequelize, DataTypes) => {
   });
 
   Class.associate = models => {
-    if (models.Student) {
       Class.hasMany(models.Student, {
         foreignKey: 'classId',
         as: 'students'
       });
-    }
 
-    if (models.Subject && models.ClassSubject) {
       Class.belongsToMany(models.Subject, {
         through: models.ClassSubject,
         foreignKey: 'classId',
         otherKey: 'subjectId',
         as: 'subjects'
       });
-    }
   };
 
   return Class;

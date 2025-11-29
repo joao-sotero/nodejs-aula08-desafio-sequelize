@@ -37,7 +37,7 @@ export default (sequelize, DataTypes) => {
       validate: {
         len: {
           args: [6, 100],
-          msg: 'Senha deve ter entre 6 e 100 caracteres'
+          msg: 'Senha deve ter entre 6 e 10 caracteres'
         }
       }
     },
