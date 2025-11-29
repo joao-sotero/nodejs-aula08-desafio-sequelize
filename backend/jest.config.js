@@ -1,9 +1,3 @@
-const storageMock = {
-  getItem: () => null,
-  setItem: () => {},
-  removeItem: () => {},
-  clear: () => {}
-};
 
 export default {
   testEnvironment: 'node',
@@ -12,7 +6,6 @@ export default {
     '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   testMatch: ['**/tests/**/*.test.js'],
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   collectCoverageFrom: [
     'src/**/*.js',
     '!src/server.js',
@@ -27,7 +20,5 @@ export default {
   verbose: true,
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons'],
-    localStorage: storageMock,
-    sessionStorage: storageMock
   }
 };
