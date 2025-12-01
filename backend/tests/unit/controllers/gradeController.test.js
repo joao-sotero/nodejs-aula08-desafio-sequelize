@@ -1,3 +1,21 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TESTES UNITÁRIOS - gradeController
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Testa o gerenciamento de notas:
+ * - create: Criar nota (com validações complexas)
+ * - getAll: Listar todas as notas
+ * - getById: Buscar nota específica
+ * - update: Atualizar nota
+ * - remove: Deletar nota
+ * 
+ * VALIDAÇÕES IMPORTANTES:
+ * - Notas entre 0 e 10
+ * - Disciplina deve estar vinculada à turma do aluno
+ * - Não pode duplicar nota (mesmo aluno, disciplina e unidade)
+ */
+
 import { jest } from '@jest/globals';
 
 const Grade = {
@@ -19,7 +37,7 @@ const Class = {
   findByPk: jest.fn()
 };
 
-await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+jest.unstable_mockModule('../../../src/models/index.js', () => ({
   __esModule: true,
   default: {
     Grade,

@@ -1,3 +1,21 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TESTES UNITÁRIOS - studentController
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Testa o CRUD de alunos:
+ * - create: Criar aluno (vinculado a uma turma)
+ * - getAll: Listar todos os alunos
+ * - getById: Buscar aluno por ID
+ * - update: Atualizar dados do aluno
+ * - remove: Deletar aluno (apenas sem notas)
+ * 
+ * RELACIONAMENTOS:
+ * - Aluno pertence a UMA turma (classId obrigatório)
+ * - Aluno pode ter várias notas (grades)
+ * - Aluno pode ter um usuário associado (User)
+ */
+
 import { jest } from '@jest/globals';
 
 const Student = {
@@ -13,7 +31,7 @@ const Class = {
 const Grade = {};
 const Subject = {};
 
-await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+jest.unstable_mockModule('../../../src/models/index.js', () => ({
   __esModule: true,
   default: {
     Student,

@@ -20,7 +20,7 @@ export const register = async (req, res, next) => {
       });
     }
 
-    const existingUser = await User.findOne({ where: { email } });
+    const existingUser = await User.findOne({ where: { email } }); //null
 
     if (existingUser) {
       return res.status(400).json({

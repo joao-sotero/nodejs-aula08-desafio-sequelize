@@ -1,5 +1,20 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TESTES UNITÁRIOS - boletimController
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Testa a geração de boletins escolares:
+ * - getMyBoletim: Aluno vê seu próprio boletim
+ * - getBoletim: Admin/Professor vê boletim de qualquer aluno
+ * - Validações de acesso e permissões
+ * - Tratamento de erros
+ * 
+ * NOTA: Este controller usa um SERVICE (boletimService) que é mockado
+ */
+
 import { jest } from '@jest/globals';
 
+// Mock da função de serviço que gera o boletim
 const generateBoletim = jest.fn();
 
 await jest.unstable_mockModule('../../../src/services/boletimService.js', () => ({
@@ -13,6 +28,7 @@ const { getMyBoletim, getBoletim } = await import('../../../src/controllers/bole
 describe('boletimController', () => {
   let req, res, next;
 
+  // Prepara mocks antes de cada teste
   beforeEach(() => {
     req = {
       params: {},
@@ -29,7 +45,13 @@ describe('boletimController', () => {
     jest.clearAllMocks();
   });
 
+  // Testa rota para aluno ver SEU PRÓPRIO boletim
   describe('getMyBoletim', () => {
+    
+    /**
+     * Cenário de sucesso: aluno autenticado com studentId válido
+     * Deve chamar o service e retornar o boletim
+     */
     it('deve retornar boletim do aluno autenticado com sucesso', async () => {
       req.user = {
         id: 1,

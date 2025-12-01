@@ -1,5 +1,24 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TESTES UNITÁRIOS - classController
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Testa o CRUD completo de turmas:
+ * - create: Criar turma
+ * - getAll: Listar turmas com contador de alunos
+ * - getById: Buscar turma específica
+ * - update: Atualizar turma
+ * - remove: Deletar turma (apenas sem alunos)
+ * - addSubjects: Associar disciplinas à turma
+ * - removeSubjects: Remover disciplinas (apenas sem notas)
+ * 
+ * COMPLEXIDADE: Este é um dos controllers mais complexos pois envolve
+ * múltiplos relacionamentos (alunos, disciplinas, notas)
+ */
+
 import { jest } from '@jest/globals';
 
+// Mocks dos models necessários
 const Class = {
   create: jest.fn(),
   findAll: jest.fn(),
@@ -18,7 +37,7 @@ const Grade = {
   findAll: jest.fn()
 };
 
-await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+jest.unstable_mockModule('../../../src/models/index.js', () => ({
   __esModule: true,
   default: {
     Class,

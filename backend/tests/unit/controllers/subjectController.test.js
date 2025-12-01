@@ -1,3 +1,20 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TESTES UNITÁRIOS - subjectController
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Testa o CRUD de disciplinas:
+ * - create: Criar disciplina
+ * - getAll: Listar disciplinas (com filtro opcional por turma)
+ * - getById: Buscar disciplina específica
+ * - update: Atualizar disciplina
+ * - remove: Deletar disciplina (apenas sem notas)
+ * 
+ * FUNCIONALIDADE ESPECIAL:
+ * - getAll pode filtrar por turma usando query string: ?classId=1
+ * - Retorna apenas disciplinas vinculadas àquela turma
+ */
+
 import { jest } from '@jest/globals';
 
 const Subject = {
@@ -12,7 +29,7 @@ const Class = {
 
 const Grade = {};
 
-await jest.unstable_mockModule('../../../src/models/index.js', () => ({
+jest.unstable_mockModule('../../../src/models/index.js', () => ({
   __esModule: true,
   default: {
     Subject,
